@@ -65,7 +65,7 @@ Table of Contents
    Author's Address
 
 
-1.  Introduction and Motivation
+# 1.  Introduction and Motivation
 
    The TCP Authentication Option (TCP-AO) [RFC5925] provides connection-
    oriented integrity and peer authentication for TCP segments with
@@ -82,7 +82,7 @@ Table of Contents
    TLS/SSH to harden the TCP substrate against spoofed resets and option
    tampering.
 
-1.1.  Conventions and Terminology
+# 1.1.  Conventions and Terminology
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -91,7 +91,7 @@ Table of Contents
    capitals, as shown here.
 
 
-2.  TCP-AO Recap
+# 2.  TCP-AO Recap
 
    TCP-AO (TCP option kind 29) protects selected TCP header fields,
    options, and payload using per-connection traffic keys derived from a
@@ -102,7 +102,7 @@ Table of Contents
    in combination with an encryption mechanism such as TLS.
 
 
-3.  Limitations of Existing Solutions (TLS/SSH and IPsec)
+# 3.  Limitations of Existing Solutions (TLS/SSH and IPsec)
 
    TLS/SSH:
 
@@ -125,7 +125,7 @@ Table of Contents
    semantics.
 
 
-4.  Applicability to NETCONF
+# 4.  Applicability to NETCONF
 
    NETCONF servers typically listen on TCP port 830 (SSH) or use TLS per
    [RFC7589].  Operators MAY deploy TCP-AO to protect the underlying TCP
@@ -144,7 +144,7 @@ Table of Contents
       TLS/SSH; AO by itself does not encrypt management content.
 
 
-5.  Applicability to gNMI
+# 5.  Applicability to gNMI
 
    gNMI commonly runs over TCP with gRPC and often with TLS.  Streaming
    telemetry subscriptions can be long-lived and bandwidth-efficient,
@@ -160,7 +160,7 @@ Table of Contents
       and negotiated options) are authenticated.
 
 
-6.  Key Management and Deployment
+# 6.  Key Management and Deployment
 
    Static keys vs. dynamic keys:
    *  Operators MAY deploy static MKTs (pre-shared keys) at moderate
@@ -182,7 +182,7 @@ Table of Contents
       SHOULD be verified on management paths.
 
 
-7.  Security Considerations
+# 7.  Security Considerations
 
    TCP-AO provides integrity and peer authentication at the transport
    layer and mitigates off-path spoofing, forged resets, and tampering
@@ -193,14 +193,14 @@ Table of Contents
    defined in [RFC5926] SHOULD be maintained.
 
 
-8.  IANA Considerations
+# 8.  IANA Considerations
 
    This document has no IANA actions.
 
 
-9.  References
+# 9.  References
 
-9.1.  Normative References
+# 9.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -220,13 +220,13 @@ Table of Contents
    [RFC9293]  Eddy, W., "Transmission Control Protocol (TCP)", STD 7,
               RFC 9293, August 2022.
 
-9.2.  Informative References
+# 9.2.  Informative References
 
    (OpenConfig gNMI specification and additional operator guidance may
    be listed here in a future revision.)
 
 
-Appendix A.  Non-Normative Notes and Examples
+# Appendix A.  Non-Normative Notes and Examples
 
    *  Example policy: require AO on TCP/830 (NETCONF) and the gNMI port
       from NMS subnets; maintain two MKTs with 24-hour overlap for
@@ -236,7 +236,7 @@ Appendix A.  Non-Normative Notes and Examples
       to verify expected failures.
 
 
-Acknowledgments
+# Acknowledgments
 
    The author thanks reviewers and operators who provided early feedback
    on applicability and deployment considerations.

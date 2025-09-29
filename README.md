@@ -127,13 +127,24 @@ Table of Contents
 
 # 4.  Applicability to NETCONF
 
-   NETCONF servers typically listen on TCP port 830 (SSH) or use TLS per
-   [RFC7589].  Operators MAY deploy TCP-AO to protect the underlying TCP
-   transport for NETCONF sessions when:
-   *  TLS/SSH are unavailable or impractical (e.g., brownfield devices
-      lacking PKI support), OR
-   *  Additional hardening of the TCP substrate is desired in defense-
-      in-depth.
+   NETCONF servers typically listen on TCP port 830 (SSH) or use TLS as
+   specified in [RFC7589].  Operators MAY deploy TCP-AO to protect the
+   underlying TCP transport for NETCONF sessions when TLS/SSH are
+   unavailable or impractical (e.g., brownfield devices lacking PKI
+   support), or when additional hardening of the TCP substrate is desired
+   in defense-in-depth.
+
+   NETCONF Protocol Stack with TCP-AO:
+
+   +-----------------------------+
+   | NETCONF application         |
+   +-----------------------------+
+   | SSH (TCP/830)  or  TLS 1.3  |  <-- integrity & conf. (E2E)
+   +-----------------------------+
+   | TCP with AO (option 29)     |  <-- integrity (hop-by-hop)
+   +-----------------------------+
+   | IPv6 / IPv4                 |
+   +-----------------------------+
 
    Guidance:
    *  AO policies SHOULD be enforced only between authorized client and
@@ -141,23 +152,43 @@ Table of Contents
    *  Operators SHOULD configure overlapping MKTs (key chains) to enable
       predictable, hitless rekeys for long-lived sessions.
    *  Where confidentiality is required, AO SHOULD be combined with
-      TLS/SSH; AO by itself does not encrypt management content.
+      SSH/TLS; AO by itself does not encrypt management content.
+
 
 
 # 5.  Applicability to gNMI
 
+5.  Applicability to gNMI
+
    gNMI commonly runs over TCP with gRPC and often with TLS.  Streaming
-   telemetry subscriptions can be long-lived and bandwidth-efficient,
-   but the control channel remains sensitive to spoofed resets and
-   tampering on the TCP path.
+   telemetry subscriptions can be long-lived and bandwidth-efficient, but
+   the control channel remains sensitive to spoofed resets and tampering
+   on the TCP path.  TCP-AO provides hop-by-hop transport integrity that
+   complements end-to-end protections offered by TLS.
+
+   gNMI Protocol Stack with TCP-AO:
+
+   +-----------------------------+
+   | gNMI application            |
+   +-----------------------------+
+   | gRPC / HTTP/2               |
+   +-----------------------------+
+   | TLS 1.3                     |  <-- integrity & conf. (E2E)
+   +-----------------------------+
+   | TCP with AO (option 29)     |  <-- integrity (hop-by-hop)
+   +-----------------------------+
+   | IPv6 / IPv4                 |
+   +-----------------------------+
 
    Guidance:
+
    *  AO MAY be applied beneath gNMI (with or without TLS) to provide
-      hop-by-hop transport integrity and to resist TCP control-plane
+      hop-by-hop transport integrity and resist TCP control-plane
       disruption.
-   *  When TLS is used for confidentiality/authentication, AO provides
-      additional assurance that TCP segments (including control flags
-      and negotiated options) are authenticated.
+   *  When TLS is used for confidentiality/authentication, AO adds
+      assurance that TCP segments (including control flags and negotiated
+      options) are authenticated.
+
 
 
 # 6.  Key Management and Deployment

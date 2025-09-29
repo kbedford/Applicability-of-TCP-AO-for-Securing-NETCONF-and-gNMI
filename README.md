@@ -58,8 +58,8 @@ Table of Contents
    7.  Security Considerations
    8.  IANA Considerations
    9.  References
-     9.1.  Normative References
-     9.2.  Informative References
+        9.1.  Normative References
+        9.2.  Informative References
    Appendix A.  Non-Normative Notes and Examples
    Acknowledgments
    Author's Address

@@ -136,15 +136,15 @@ Table of Contents
 
    NETCONF Protocol Stack with TCP-AO:
 
-   +-----------------------------+
-   | NETCONF application         |
-   +-----------------------------+
-   | SSH (TCP/830)  or  TLS 1.3  |  <-- integrity & conf. (E2E)
-   +-----------------------------+
-   | TCP with AO (option 29)     |  <-- integrity (hop-by-hop)
-   +-----------------------------+
-   | IPv6 / IPv4                 |
-   +-----------------------------+
+         +-----------------------------+
+         | NETCONF application         |
+         +-----------------------------+
+         | SSH (TCP/830)  or  TLS 1.3  |  <-- integrity & conf. (E2E)
+         +-----------------------------+
+         | TCP with AO (option 29)     |  <-- integrity (hop-by-hop)
+         +-----------------------------+
+         | IPv6 / IPv4                 |
+         +-----------------------------+
 
    Guidance:
    *  AO policies SHOULD be enforced only between authorized client and
@@ -168,17 +168,17 @@ Table of Contents
 
    gNMI Protocol Stack with TCP-AO:
 
-   +-----------------------------+
-   | gNMI application            |
-   +-----------------------------+
-   | gRPC / HTTP/2               |
-   +-----------------------------+
-   | TLS 1.3                     |  <-- integrity & conf. (E2E)
-   +-----------------------------+
-   | TCP with AO (option 29)     |  <-- integrity (hop-by-hop)
-   +-----------------------------+
-   | IPv6 / IPv4                 |
-   +-----------------------------+
+         +-----------------------------+
+         | gNMI application            |
+         +-----------------------------+
+         | gRPC / HTTP/2               |
+         +-----------------------------+
+         | TLS 1.3                     |  <-- integrity & conf. (E2E)
+         +-----------------------------+
+         | TCP with AO (option 29)     |  <-- integrity (hop-by-hop)
+         +-----------------------------+
+         | IPv6 / IPv4                 |
+         +-----------------------------+
 
    Guidance:
 

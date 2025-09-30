@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude"
+     submissionType="IETF"
+     category="info"
+     ipr="trust200902"
+     xml:lang="en"
+     version="3"
+     symRefs="true"
+     sortRefs="true"
+     tocInclude="true"
+     docName="draft-bedford-tcpm-ao-for-gnmi-netconf-00">
+
+  <front>
+    <title>Applicability of TCP-AO for Securing NETCONF and gNMI</title>
+
+    <seriesInfo name="Internet-Draft" value="draft-bedford-tcpm-ao-for-gnmi-netconf-00"/>
+
+    <author fullname="Kenneth Wignarajah Bedford" initials="K.W." surname="Bedford">
+      <organization>Juniper Networks</organization>
+      <address>
+        <postal>
+          <city>Basingstoke</city>
+          <country>United Kingdom</country>
+        </postal>
+        <email>kbedford@juniper.net</email>
+      </address>
+    </author>
+
+    <!-- Set to the date you want displayed -->
+    <date year="2025" month="September" day="29"/>
+    <area>Transport</area>
+    <workgroup>TCP Maintenance and Minor Extensions (TCPM)</workgroup>
+
+    <abstract>
+      <t>This document analyzes the applicability of the TCP Authentication
+      Option (TCP-AO) to secure TCP-based network management protocols,
+      specifically NETCONF and gNMI. It describes deployment profiles in
+      which TCP-AO provides per-connection integrity and peer
+      authentication with low operational overhead, either as an
+      alternative to or in combination with TLS/SSH. This document gives
+      guidance on key management (e.g., static keys and operational "key
+      chains") and documents expected behaviors and benefits. No new
+      protocol bits are defined and there are no IANA actions.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section numbered="true" toc="default">
+      <name>Introduction and Motivation</name>
+      <t>The TCP Authentication Option (TCP-AO) <xref target="RFC5925"/> provides connection-
+      oriented integrity and peer authentication for TCP segments with
+      cryptographic agility <xref target="RFC5926"/>. TCP-AO has seen deployment
+      primarily with routing/control protocols; however, its applicability
+      to network management and telemetry protocols is under-documented.</t>
+
+      <t>This document specifies practical applicability guidance for using
+      TCP-AO with two widely used TCP-based management protocols: NETCONF
+      <xref target="RFC6241"/> (commonly over SSH <xref target="RFC6242"/> or TLS <xref target="RFC7589"/>) and gNMI
+      (as specified by the OpenConfig community, see <xref target="OC-GNMI"/>).
+      TCP-AO can be used: (a) as a lightweight hop-by-hop integrity
+      mechanism when TLS/SSH are operationally impractical; or (b) in
+      defense-in-depth alongside TLS/SSH to harden the TCP substrate
+      against spoofed resets and option tampering.</t>
+    </section>
+
+    <section anchor="terminology">
+      <name>Conventions and Terminology</name>
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+      "OPTIONAL" in this document are to be interpreted as described in
+      BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when, they appear in all
+      capitals, as shown here.</t>
+    </section>
+
+    <section>
+      <name>TCP-AO Recap</name>
+      <t>TCP-AO (TCP option kind 29; see TCP specification <xref target="RFC9293"/>) protects selected TCP header fields,
+      options, and payload using per-connection traffic keys derived from a
+      Master Key Tuple (MKT). It supports algorithm agility and hitless
+      rekey via KeyIDs, as specified in <xref target="RFC5925"/> and <xref target="RFC5926"/>.
+      TCP-AO provides integrity and peer authentication only; it does not
+      provide confidentiality. When confidentiality is required, it
+      SHOULD be used in combination with an encryption mechanism such as TLS.</t>
+    </section>
+
+    <section>
+      <name>Limitations of Existing Solutions (TLS/SSH and IPsec)</name>
+      <t>TLS/SSH:</t>
+      <ul>
+        <li><t>Provide end-to-end confidentiality and rich authentication, but require PKI, certificate lifecycle management, and consistent trust-store operations across heterogeneous fleets.</t></li>
+        <li><t>Do not protect the underlying TCP control plane itself against certain transport-level disruptions (e.g., off-path resets or option tampering on unencrypted segments prior to keying).</t></li>
+      </ul>
+      <t>IPsec:</t>
+      <ul>
+        <li><t>Offers strong security properties but introduces per-SA policy management, NAT traversal considerations, and often coarser granularity (per-host/per-subnet) than operators desire for per-connection management channels.</t></li>
+      </ul>
+      <t>In contrast, TCP-AO offers a lightweight, hop-by-hop protection model with explicit per-connection association and zero-loss rekey semantics.</t>
+    </section>
+
+    <section>
+      <name>Applicability to NETCONF</name>
+      <t>NETCONF servers typically listen on TCP port 830 (SSH) or use TLS per <xref target="RFC7589"/>. Operators MAY deploy TCP-AO to protect the underlying TCP transport for NETCONF sessions when:</t>
+      <ul>
+        <li><t>TLS/SSH are unavailable or impractical (e.g., brownfield devices lacking PKI support), OR</t></li>
+        <li><t>Additional hardening of the TCP substrate is desired in defense-in-depth.</t></li>
+      </ul>
+      <t>Guidance:</t>
+      <ul>
+        <li><t>AO policies SHOULD be enforced only between authorized client and server peers (e.g., NMS subnets).</t></li>
+        <li><t>Operators SHOULD configure overlapping MKTs (key chains) to enable predictable, hitless rekeys for long-lived sessions.</t></li>
+        <li><t>Where confidentiality is required, AO SHOULD be combined with TLS/SSH; AO by itself does not encrypt management content.</t></li>
+      </ul>
+    </section>
+
+    <section>
+      <name>Applicability to gNMI</name>
+      <t>gNMI commonly runs over TCP with gRPC and often with TLS. Streaming telemetry subscriptions can be long-lived and bandwidth-efficient, but the control channel remains sensitive to spoofed resets and tampering on the TCP path.</t>
+      <t>Guidance:</t>
+      <ul>
+        <li><t>AO MAY be applied beneath gNMI (with or without TLS) to provide hop-by-hop transport integrity and to resist TCP control-plane disruption.</t></li>
+        <li><t>When TLS is used for confidentiality/authentication, AO provides additional assurance that TCP segments (including control flags and negotiated options) are authenticated.</t></li>
+      </ul>
+    </section>
+
+    <section>
+      <name>Key Management and Deployment</name>
+      <t>Static keys vs. dynamic keys:</t>
+      <ul>
+        <li><t>Operators MAY deploy static MKTs (pre-shared keys) at moderate scale. To avoid outages during rotation, operators SHOULD use key chains with overlapping lifetimes and planned KeyID transitions.</t></li>
+        <li><t>TCP-AO does not define in-band key management; dynamic keying occurs out-of-band. Existing automation systems (e.g., via NETCONF/TLS or gNMI/TLS) MAY distribute and rotate MKTs securely.</t></li>
+      </ul>
+      <t>Algorithm selection:</t>
+      <ul>
+        <li><t>Implementations MUST follow <xref target="RFC5926"/> for required MACs/KDFs. Operators SHOULD prefer modern, efficient MACs consistent with implementation guidance.</t></li>
+      </ul>
+      <t>Deployment notes:</t>
+      <ul>
+        <li><t>TCP-AO is not compatible with address/port translation; the peers' IP addresses and ports are part of the authenticated context.</t></li>
+        <li><t>TCP-AO slightly reduces available MSS due to option bytes; PMTUD SHOULD be verified on management paths.</t></li>
+      </ul>
+    </section>
+
+    <section>
+      <name>Security Considerations</name>
+      <t>TCP-AO provides integrity and peer authentication at the transport layer and mitigates off-path spoofing, forged resets, and tampering with protected TCP options and payload. It does not provide confidentiality; when secrecy is required, AO SHOULD be combined with TLS. Key hygiene is critical: per-peer unique MKTs SHOULD be used, rotated regularly, and tracked operationally. Algorithm agility as defined in <xref target="RFC5926"/> SHOULD be maintained.</t>
+    </section>
+
+    <section>
+      <name>IANA Considerations</name>
+      <t>This document has no IANA actions.</t>
+    </section>
+
+    <section anchor="appendix-a">
+      <name>Appendix A. Non-Normative Notes and Examples</name>
+      <ul>
+        <li><t>Example policy: require AO on TCP/830 (NETCONF) and the gNMI port from NMS subnets; maintain two MKTs with 24-hour overlap for monthly rotations.</t></li>
+        <li><t>Lab validation: capture AO presence with a packet analyzer (TCP option kind 29) and test negative cases (wrong KeyID, wrong MAC) to verify expected failures.</t></li>
+      </ul>
+    </section>
+
+    <section>
+      <name>Acknowledgments</name>
+      <t>The author thanks reviewers and operators who provided early feedback on applicability and deployment considerations.</t>
+    </section>
+  </middle>
+
+  <back>
+    <references>
+      <name>Normative References</name>
+
+      <reference anchor="RFC2119" target="https://www.rfc-editor.org/info/rfc2119">
+        <front>
+          <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+          <author initials="S." surname="Bradner" fullname="Scott Bradner"/>
+          <date month="March" year="1997"/>
+        </front>
+        <seriesInfo name="BCP" value="14"/>
+        <seriesInfo name="RFC" value="2119"/>
+      </reference>
+
+      <reference anchor="RFC8174" target="https://www.rfc-editor.org/info/rfc8174">
+        <front>
+          <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+          <author initials="B." surname="Leiba" fullname="Barry Leiba"/>
+          <date month="May" year="2017"/>
+        </front>
+        <seriesInfo name="BCP" value="14"/>
+        <seriesInfo name="RFC" value="8174"/>
+      </reference>
+
+      <reference anchor="RFC5925" target="https://www.rfc-editor.org/info/rfc5925">
+        <front>
+          <title>The TCP Authentication Option</title>
+          <author initials="J." surname="Touch" fullname="Joe Touch"/>
+          <author initials="A." surname="Mankin" fullname="Allison Mankin"/>
+          <author initials="R." surname="Bonica" fullname="Ron Bonica"/>
+          <date month="June" year="2010"/>
+        </front>
+        <seriesInfo name="RFC" value="5925"/>
+      </reference>
+
+      <reference anchor="RFC5926" target="https://www.rfc-editor.org/info/rfc5926">
+        <front>
+          <title>Cryptographic Algorithms for the TCP Authentication Option</title>
+          <author initials="G." surname="Lebovitz" fullname="Gregory Lebovitz"/>
+          <author initials="E." surname="Rescorla" fullname="Eric Rescorla"/>
+          <date month="June" year="2010"/>
+        </front>
+        <seriesInfo name="RFC" value="5926"/>
+      </reference>
+
+      <reference anchor="RFC6241" target="https://www.rfc-editor.org/info/rfc6241">
+        <front>
+          <title>Network Configuration Protocol (NETCONF)</title>
+          <author initials="R." surname="Enns" fullname="Randy Enns"/>
+          <author initials="M." surname="Bjorklund" fullname="Martin Bjorklund"/>
+          <author initials="J." surname="Schoenwaelder" fullname="Juergen Schoenwaelder"/>
+          <author initials="A." surname="Bierman" fullname="Andy Bierman"/>
+          <date month="June" year="2011"/>
+        </front>
+        <seriesInfo name="RFC" value="6241"/>
+      </reference>
+
+      <reference anchor="RFC6242" target="https://www.rfc-editor.org/info/rfc6242">
+        <front>
+          <title>Using the NETCONF Protocol over Secure Shell (SSH)</title>
+          <author initials="M." surname="Wasserman" fullname="Margaret Wasserman"/>
+          <date month="June" year="2011"/>
+        </front>
+        <seriesInfo name="RFC" value="6242"/>
+      </reference>
+
+      <reference anchor="RFC7589" target="https://www.rfc-editor.org/info/rfc7589">
+        <front>
+          <title>Using the NETCONF Protocol over Transport Layer Security (TLS) with Mutual X.509 Authentication</title>
+          <author initials="M." surname="Badra" fullname="Mohamed Badra"/>
+          <author initials="J." surname="Schoenwaelder" fullname="Juergen Schoenwaelder"/>
+          <date month="April" year="2015"/>
+        </front>
+        <seriesInfo name="RFC" value="7589"/>
+      </reference>
+
+      <reference anchor="RFC9293" target="https://www.rfc-editor.org/info/rfc9293">
+        <front>
+          <title>Transmission Control Protocol (TCP)</title>
+          <author initials="W." surname="Eddy" fullname="Wesley Eddy"/>
+          <date month="August" year="2022"/>
+        </front>
+        <seriesInfo name="STD" value="7"/>
+        <seriesInfo name="RFC" value="9293"/>
+      </reference>
+    </references>
+
+    <references>
+      <name>Informative References</name>
+
+      <reference anchor="OC-GNMI" target="https://github.com/openconfig/gnmi">
+        <front>
+          <title>gNMI Specification</title>
+          <author fullname="OpenConfig Working Group"/>
+          <date year="2025"/>
+        </front>
+      </reference>
+    </references>
+  </back>
+</rfc>
